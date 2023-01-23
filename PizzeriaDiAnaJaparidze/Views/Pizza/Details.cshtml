@@ -1,0 +1,17 @@
+﻿@{
+    Layout = "_BaseLayout";
+}
+
+@model Pizza
+
+<div class="container">
+    <div class="row">
+        <div class="col-6">
+            <img src="@Model.Image"/>
+
+            <h2>@Model.Title</h2>
+            <p>@Model.Description</p>
+
+        </div>
+    </div>
+</div>
