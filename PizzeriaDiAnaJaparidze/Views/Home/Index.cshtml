@@ -8,26 +8,55 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <h1 class="mt-3 mb-3">Lista Delle Pizze</h1>
+                @*input search*@
+                <input id="searchInput" placeholder="search"/>
             </div>
         </div>
     </div>
+@*    logo che scarica
+    *@    
+    <div id="spinner-loader" class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span style="width:100px;" class="sr-only"></span>
+        </div>
+    </div>
+
+
     <div class="row js_no_post text-center d-none">
         <div class="col-12">
             <h3>Non hai inserito alcuna pizza</h3>
         </div>
     </div>
+
     <div class="row js_post_table d-none">
     </div>
 </div>
 
 @section Scripts {
     <script type="text/javascript">
+        loadList();
+        
+        document.getElementById("searchInput").addEventListener('keyup', searchArticles);
 
-    loadList();
 
-        function loadList() {
+        function searchArticles(){
 
-            axios.get('/api/articolo').then((res) => {
+            let stringaDiRicerca = document.getElementById('searchInput').value;
+
+            console.log(stringaDiRicerca);
+
+            loadList(stringaDiRicerca);
+        }
+
+
+        function loadList(searchString) {
+
+            axios.get('/api/articolo', {
+
+        params:{
+            search:searchString
+                }
+            }).then((res) => {
 
                 console.log('risultato ok', res);
 
@@ -46,14 +75,17 @@
                     res.data.forEach(pizza => {
 
                         console.log('pizza', pizza);
-
+                        //agigungi il link dove vuoi andare details.
+                        
                         document.querySelector('.js_post_table').innerHTML +=
                             `
                                            <div class="col-12 col-md-4 p-2">
                                             <div class="card post h-100">
-                                              <img src="${pizza.image}" class="card-img-top" alt="...">
+                                                              <img src="${pizza.image}" class="card - img - top" alt="...">
+
                                               <div class="card-body">
                                                 <h5 class="card-title">${pizza.title}</h5>
+                                                        <a href="/ Home / Details / ${pizza.id}">Dettagli</a>
                                                 <p class="card-text">${pizza.description}</p>
                                               </div>
                                             </div>
@@ -61,13 +93,15 @@
                                      `;
                     });
                 }
+document.getElementById("spinner-loader").classList.add("d-none");
+
             }).catch((error) => {
                 console.log(error);
             });
 
         }
-
-    </script>
+        
+        </script>
 
     }
 

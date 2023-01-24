@@ -1,0 +1,35 @@
+﻿<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div id="articolo_container">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        const id = window.location.href.substring(window.location.href.lastIndexOf("/") + 1);
+
+        axios.get(`http://localhost:7119/api/articolo${id}`).then((res) => {
+            debugger;
+            let articolo = res.data;
+            console.log('articolo ricevuto', articolo);
+
+
+            document.getElementById('articolo_container').innerHTML +=
+                `
+                                    <div class="col-12 col-md-4 p-2">
+                                          <div class="card post h-100">
+                                                <img src="${articolo.image}" class="card-img-top" alt="...">
+                                                <div class="card-body">
+                                                <h5 class="card-title">${articolo.title}</h5>
+                                                        <p class="card-text">${articolo.description}</p>
+                                                </div>
+                                        </div>
+                                    </div>
+                                `;
+        })
+
+    </script>
+}
