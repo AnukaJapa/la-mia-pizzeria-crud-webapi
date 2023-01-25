@@ -1,18 +1,22 @@
-﻿<div class="container">
+﻿@{Layout="_BaseLayout";}
+
+<div class="container">
+
     <div class="row">
         <div class="col-12">
-            <div id="articolo_container">
-            </div>
+
+            <div id="articolo_container"></div>
+
         </div>
     </div>
+
 </div>
 
 @section Scripts {
     <script type="text/javascript">
-        const id = window.location.href.substring(window.location.href.lastIndexOf("/") + 1);
+        const id = window.location.href.substring(window.location.href.lastIndexOf('/') + 1);
 
-        axios.get(`http://localhost:7119/api/articolo${id}`).then((res) => {
-            debugger;
+        axios.get(`https://localhost:7119/api/articolo/${id}`).then((res) => {
             let articolo = res.data;
             console.log('articolo ricevuto', articolo);
 
