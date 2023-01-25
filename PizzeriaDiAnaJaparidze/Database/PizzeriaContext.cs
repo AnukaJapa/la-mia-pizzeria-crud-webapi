@@ -8,11 +8,11 @@ namespace PizzeriaDiAnaJaparidze.Database
     {
       public DbSet<Pizza> Pizzas { get; set; }
       public DbSet<Category> Categories { get; set; }
-
+      public DbSet<Tag> Tags { get; set; }    
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Data Source=localhost;Database=PizzeriaAnaDB1;" +
+            optionsBuilder.UseSqlServer("Data Source=localhost;Database=PizzeriaAnaDB2;" +
             "Integrated Security=True;TrustServerCertificate=True");
         }
     }

@@ -11,6 +11,17 @@
 
             <h2>@Model.Title</h2>
             <p>@Model.Description</p>
+            
+            <p>
+                <strong>Categoria:</strong>
+            @Model.Category.Title
+            </p>
+            <p>
+                <strong>Tags:</strong>
+                @foreach(Tag tag in Model.Tags){
+                    <div> <label>@tag.Title</label></div>
+                }
+            </p>
 
         </div>
     </div>

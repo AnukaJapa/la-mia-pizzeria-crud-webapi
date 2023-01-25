@@ -22,12 +22,14 @@
                         <h5 class="card-title">@elemento.Title</h5>
                         <p class="card-text">@elemento.Description</p>
 
-                        <button class="btn btn-warning btn-sm" href="@Url.Action("Details", "Pizza", new { id = elemento.Id })"> Details </button>
+                        <a class="btn btn-warning btn-sm" href="@Url.Action("Details", "Pizza", new { id = elemento.Id })"> Details </a>
 
-                        <button class="btn btn-warning btn-sm modifyBtn" href="@Url.Action("Update", "Pizza", new { id = elemento.Id })"> Modify </button>
+                        <a class="btn btn-warning btn-sm modifyBtn" href="@Url.Action("Update", "Pizza", new { id = elemento.Id })"> Modify </a>
 
-                        <form asp-controller="Pizza" asp-action="Delete" asp-route-id="@elemento.Id" method="post" class="btn btn-warning btn-sm"><button class="btn btn-warning btn-sm" type="submit"> Delete </button></form>
+                        <form asp-controller="Pizza" asp-action="Delete" asp-route-id="@elemento.Id" method="post" class="bottone btn btn-warning btn-sm"><button class="btn btn-warning btn-sm" type="submit"> Delete </button></form>
                     </div>
+@Html.AntiForgeryToken()
+
 
                 </div>
             </div>

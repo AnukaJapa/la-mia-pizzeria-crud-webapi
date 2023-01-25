@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.SqlServer.Server;
 using PizzeriaDiAnaJaparidze.Database;
 using PizzeriaDiAnaJaparidze.Models;
+using PizzeriaDiAnaJaparidze.Utilities;
 
 namespace PizzeriaDiAnaJaparidze.Controllers
 {
@@ -18,13 +20,13 @@ namespace PizzeriaDiAnaJaparidze.Controllers
                 return View("Index", pizzaList);
             }
         }
-
+ //--------------------------------------------
         public IActionResult Details(int id)
         {
            using (PizzeriaContext db = new PizzeriaContext()){
                
                 Pizza pizzaTrovata = db.Pizzas
-                   .Where(p => p.Id == id).Include(pizza => pizza.Category)
+                   .Where(p => p.Id == id).Include(pizza => pizza.Category).Include(p=>p.Tags)
                    .FirstOrDefault();
 
                 if (pizzaTrovata != null)
@@ -37,21 +39,26 @@ namespace PizzeriaDiAnaJaparidze.Controllers
 
         }
       
-
+//----------------------------------------------
         [HttpGet]
         public IActionResult Create()
         {
             using(PizzeriaContext db = new PizzeriaContext())
             {
                 List<Category> categoriesFromDB = db.Categories.ToList<Category>();
+
                 PizzaCategoriesView modelForView = new PizzaCategoriesView();
+
                 modelForView.Pizza = new Pizza();
                 modelForView.Categories = categoriesFromDB;
+                modelForView.Tags = TagsConverter.getListTagsForMultipleSelect();
+              
                 return View("Create", modelForView);
 
             }
         }
 
+//_-----------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(PizzaCategoriesView formData)
@@ -62,11 +69,27 @@ namespace PizzeriaDiAnaJaparidze.Controllers
                 {
                     List<Category> categories = db.Categories.ToList<Category>();
                     formData.Categories = categories;
+
+                    formData.Tags = TagsConverter.getListTagsForMultipleSelect();
+               
                     return View("Create", formData);
 
                 }
                 else
                 {
+                    if(formData.TagsSelectedFromMultipleSelect != null)
+                    {
+                        formData.Pizza.Tags = new List<Tag>();
+                        foreach(string tagId in formData.TagsSelectedFromMultipleSelect)
+                        {
+                            int tagIdIntFromSelect = int.Parse(tagId);
+                            Tag tag = db.Tags.Where(tagDb=> tagDb.Id == tagIdIntFromSelect).FirstOrDefault();
+
+                            formData.Pizza.Tags.Add(tag);
+                        }
+
+                    }
+
                     db.Pizzas.Add(formData.Pizza);
                     db.SaveChanges();
                 }
@@ -84,7 +107,7 @@ namespace PizzeriaDiAnaJaparidze.Controllers
         {
             using(PizzeriaContext db = new PizzeriaContext())
             {
-                Pizza pizzaToUpdate = db.Pizzas.Where(p => p.Id == id).FirstOrDefault();
+                Pizza pizzaToUpdate = db.Pizzas.Where(p => p.Id == id).Include(p=>p.Tags).FirstOrDefault();
 
                 if (pizzaToUpdate == null)
                 {
@@ -92,13 +115,30 @@ namespace PizzeriaDiAnaJaparidze.Controllers
                 }
 
                 List<Category> categories = db.Categories.ToList<Category>();
+
                 PizzaCategoriesView modelForView = new PizzaCategoriesView();
                 modelForView.Pizza = pizzaToUpdate;
                 modelForView.Categories = categories;
- 
+
+                List<Tag> listTagFromDb = db.Tags.ToList<Tag>();
+                List<SelectListItem> listaOpzioniPerLaSelect = new List<SelectListItem>();
+
+                foreach(Tag tag in listTagFromDb)
+                {
+                    bool eraStatoSelezionato = pizzaToUpdate.Tags.Any(tagSelezionati => tagSelezionati.Id == tag.Id);
+
+                    SelectListItem opzioneSingolaSelect = new SelectListItem() { Text = tag.Title, Value = tag.Id.ToString(), Selected = eraStatoSelezionato };
+                    listaOpzioniPerLaSelect.Add(opzioneSingolaSelect);
+                }
+
+                modelForView.Tags = listaOpzioniPerLaSelect;
                 return View("Update", modelForView);
+
             }
+
         }
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -111,30 +151,47 @@ namespace PizzeriaDiAnaJaparidze.Controllers
                 {
                     List<Category> categories = db.Categories.ToList<Category>();
                     formPizza.Categories = categories;
-                }
                 return View("Update", formPizza);
+                 }
+               
             }
-            using (PizzeriaContext db = new PizzeriaContext())
+
+        using (PizzeriaContext db = new PizzeriaContext())
             {
-                Pizza pizzaToUpdate = db.Pizzas.Where(p=>p.Id == id).FirstOrDefault();
+            Pizza pizzaToUpdate = db.Pizzas.Where(p => p.Id == id).Include(p => p.Tags).FirstOrDefault();
 
-                if (pizzaToUpdate != null)
+            if (pizzaToUpdate != null)
+            {
+                pizzaToUpdate.Title = formPizza.Pizza.Title;
+                pizzaToUpdate.Description = formPizza.Pizza.Description;
+                pizzaToUpdate.Image = formPizza.Pizza.Image;
+                pizzaToUpdate.CategoryId = formPizza.Pizza.CategoryId;
+
+                pizzaToUpdate.Tags.Clear();
+
+                if (formPizza.TagsSelectedFromMultipleSelect != null)
                 {
-                    pizzaToUpdate.Title = formPizza.Pizza.Title;
-                    pizzaToUpdate.Description = formPizza.Pizza.Description;
-                    pizzaToUpdate.Image = formPizza.Pizza.Image;
-                    pizzaToUpdate.CategoryId = formPizza.Pizza.CategoryId;
-
-
-                    db.SaveChanges();
-                    return RedirectToAction("Index");
+                    foreach (string tagId in formPizza.TagsSelectedFromMultipleSelect)
+                    {
+                        int tagIdIntFromSelect = int.Parse(tagId);
+                        Tag tag = db.Tags.Where(tagDb => tagDb.Id == tagIdIntFromSelect).FirstOrDefault();
+                        pizzaToUpdate.Tags.Add(tag);
+                    }
                 }
-                else
-                {
-                    return NotFound("Il post che volevi modificare non è stato trovato!");
-                }
+
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                return NotFound("Il post che volevi modificare non è stato trovato!");
+            }
+
+              
             }
         }
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -157,6 +214,14 @@ namespace PizzeriaDiAnaJaparidze.Controllers
                 }
             }
         }
+
+    [HttpDelete]
+    public IActionResult ProvaDelete()
+    {
+        return View("Create");
+    }
+
+
 
     }
 }

@@ -27,6 +27,7 @@
                     <span asp-validation-for="Pizza.Image" class="text-danger"></span>
 
                 </div>
+
                  <div class="mb-3">
             <label>Categoria:</label>
             <select asp-for="Pizza.CategoryId" rows="10" class="d-block w-100">
@@ -37,11 +38,20 @@
                 }
             </select>
             <span asp-validation-for="Pizza.CategoryId" class="text-danger"></span>
-        </div>
-                <div class="text-end">
+                </div>
+
+                <div class="mb-3">
+                    <label>tag:</label>
+                    <select asp-for="TagsSelectedFromMultipleSelect" asp-items="@Model.Tags" multiple size="10" class="form-control mb-2 mr-sm-2 ml-sm-3 leftList">
+                    </select>
+                </div>
+
+                 <div class="text-end">
                     <input type="submit" class="btn btn-small btn-info" value="Salva">
                 </div>
             </form>
-    </div>
+     </div>
 </divc>    
 </div>
+
+
